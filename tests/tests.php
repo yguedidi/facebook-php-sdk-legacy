@@ -16,8 +16,8 @@
  * under the License.
  */
 
-use Facebook\BaseFacebook;
 use Facebook\Facebook;
+use Facebook\SharedFacebook;
 use Facebook\Exception\FacebookApiException;
 
 class PHPSDKTestCase extends PHPUnit_Framework_TestCase
@@ -1555,10 +1555,9 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
     public function testSharedSessionBackedFacebook()
     {
         $_SERVER['HTTP_HOST'] = 'fbrell.com';
-        $fb = new PersistentFBPublic(array(
+        $fb = new SharedPersistentFBPublic(array(
             'appId' => self::APP_ID,
             'secret' => self::SECRET,
-            'sharedSession' => true,
         ));
         $key = 'state';
         $val = 'foo';
@@ -1573,10 +1572,9 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
     public function testSharedSessionBackedFacebookIgnoresUnsupportedKey()
     {
         $_SERVER['HTTP_HOST'] = 'fbrell.com';
-        $fb = new PersistentFBPublic(array(
+        $fb = new SharedPersistentFBPublic(array(
             'appId' => self::APP_ID,
             'secret' => self::SECRET,
-            'sharedSession' => true,
         ));
         $key = '--invalid--';
         $val = 'foo';
@@ -1591,10 +1589,9 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
     public function testSharedClearSessionBackedFacebook()
     {
         $_SERVER['HTTP_HOST'] = 'fbrell.com';
-        $fb = new PersistentFBPublic(array(
+        $fb = new SharedPersistentFBPublic(array(
             'appId' => self::APP_ID,
             'secret' => self::SECRET,
-            'sharedSession' => true,
         ));
         $key = 'state';
         $val = 'foo';
@@ -1612,10 +1609,9 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
     public function testSharedSessionBackedFacebookIgnoresUnsupportedKeyInClear()
     {
         $_SERVER['HTTP_HOST'] = 'fbrell.com';
-        $fb = new PersistentFBPublic(array(
+        $fb = new SharedPersistentFBPublic(array(
             'appId' => self::APP_ID,
             'secret' => self::SECRET,
-            'sharedSession' => true,
         ));
         $key = '--invalid--';
         $val = 'foo';
@@ -1631,10 +1627,9 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
     public function testSharedClearAllSessionBackedFacebook()
     {
         $_SERVER['HTTP_HOST'] = 'fbrell.com';
-        $fb = new PersistentFBPublic(array(
+        $fb = new SharedPersistentFBPublic(array(
             'appId' => self::APP_ID,
             'secret' => self::SECRET,
-            'sharedSession' => true,
         ));
         $key = 'state';
         $val = 'foo';
@@ -1652,10 +1647,9 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
     public function testSharedSessionBackedFacebookIsRestored()
     {
         $_SERVER['HTTP_HOST'] = 'fbrell.com';
-        $fb = new PersistentFBPublic(array(
+        $fb = new SharedPersistentFBPublic(array(
             'appId' => self::APP_ID,
             'secret' => self::SECRET,
-            'sharedSession' => true,
         ));
         $key = 'state';
         $val = 'foo';
@@ -1668,10 +1662,9 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
         $this->assertEquals($val, $fb->publicGetPersistentData($key));
 
         // check the new instance has the same data
-        $fb = new PersistentFBPublic(array(
+        $fb = new SharedPersistentFBPublic(array(
             'appId' => self::APP_ID,
             'secret' => self::SECRET,
-            'sharedSession' => true,
         ));
         $this->assertEquals(
             $shared_session_id, $fb->publicGetSharedSessionID()
@@ -1682,10 +1675,9 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
     public function testSharedSessionBackedFacebookIsNotRestoredWhenCorrupt()
     {
         $_SERVER['HTTP_HOST'] = 'fbrell.com';
-        $fb = new PersistentFBPublic(array(
+        $fb = new SharedPersistentFBPublic(array(
             'appId' => self::APP_ID,
             'secret' => self::SECRET,
-            'sharedSession' => true,
         ));
         $key = 'state';
         $val = 'foo';
@@ -1702,10 +1694,9 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
         $_COOKIE[$cookie_name] = substr($_COOKIE[$cookie_name], 1);
 
         // check the new instance does not have the data
-        $fb = new PersistentFBPublic(array(
+        $fb = new SharedPersistentFBPublic(array(
             'appId' => self::APP_ID,
             'secret' => self::SECRET,
-            'sharedSession' => true,
         ));
         $this->assertFalse($fb->publicGetPersistentData($key));
         $this->assertNotEquals(
@@ -1779,7 +1770,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
     public function testEndsWith($big, $small, $result)
     {
         $this->assertEquals(
-            $result, PersistentFBPublic::publicEndsWith($big, $small)
+            $result, SharedPersistentFBPublic::publicEndsWith($big, $small)
         );
     }
 
@@ -1803,7 +1794,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
     public function testIsAllowedDomain($big, $small, $result)
     {
         $this->assertEquals(
-            $result, PersistentFBPublic::publicIsAllowedDomain($big, $small)
+            $result, SharedPersistentFBPublic::publicIsAllowedDomain($big, $small)
         );
     }
 
@@ -1865,7 +1856,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
     }
 }
 
-class TransientFacebook extends BaseFacebook
+class TransientFacebook extends Facebook
 {
 
     protected function setPersistentData($key, $value)
@@ -1949,6 +1940,50 @@ class FBPublic extends TransientFacebook
 }
 
 class PersistentFBPublic extends Facebook
+{
+
+    public function publicParseSignedRequest($input)
+    {
+        return $this->parseSignedRequest($input);
+    }
+
+    public function publicSetPersistentData($key, $value)
+    {
+        $this->setPersistentData($key, $value);
+    }
+
+    public function publicGetPersistentData($key, $default = false)
+    {
+        return $this->getPersistentData($key, $default);
+    }
+
+    public function publicClearPersistentData($key)
+    {
+        return $this->clearPersistentData($key);
+    }
+
+    public function publicClearAllPersistentData()
+    {
+        return $this->clearAllPersistentData();
+    }
+
+    public function publicGetSharedSessionCookieName()
+    {
+        return $this->getSharedSessionCookieName();
+    }
+
+    public function publicGetHttpHost()
+    {
+        return $this->getHttpHost();
+    }
+
+    public function publicGetHttpProtocol()
+    {
+        return $this->getHttpProtocol();
+    }
+}
+
+class SharedPersistentFBPublic extends SharedFacebook
 {
 
     public function publicParseSignedRequest($input)

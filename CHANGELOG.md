@@ -11,4 +11,6 @@ __v4.0.0-community__ (2013-XX-XX)
 * Add `phpunit.xml.dist` file
 * PSR-2 refactoring
 * Make `$READ_ONLY_CALLS` a static class member
-* Add `.scrutinizer.yml` file
+* Refactor BaseFacebook to a concrete class Facebook using sessions
+* Refactor Facebook to SharedFacebook, inherit from Facebook
+  that manage shared session
