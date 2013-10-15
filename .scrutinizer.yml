@@ -25,5 +25,6 @@ tools:
     php_code_coverage:
         filter:
             excluded_paths: ['vendor/*', 'app/*', 'web/*']
+        test_command: phpunit --stderr
 before_commands:
     - "composer install --dev"
