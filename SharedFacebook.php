@@ -48,6 +48,15 @@ class SharedFacebook extends Facebook
                 // good case
                 $this->sharedSessionID = $data['id'];
 
+                // re-load the persisted state, since parent
+                // attempted to read out of non-shared cookie
+                $state = $this->getPersistentData('state');
+                if (!empty($state)) {
+                    $this->state = $state;
+                } else {
+                    $this->state = null;
+                }
+
                 return;
             }
             // ignoring potentially unreachable data

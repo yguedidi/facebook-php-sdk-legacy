@@ -1017,8 +1017,9 @@ class Facebook
         curl_setopt_array($ch, $opts);
         $result = curl_exec($ch);
 
-        // CURLE_SSL_CACERT
-        if (curl_errno($ch) == 60) {
+        $errno = curl_errno($ch);
+        // CURLE_SSL_CACERT || CURLE_SSL_CACERT_BADFILE
+        if ($errno == 60 || $errno == 77) {
             self::errorLog(
                 'Invalid or no certificate authority found, ' .
                 'using bundled information'
@@ -1475,7 +1476,9 @@ class Facebook
         }
 
         $session_var_name = $this->constructSessionVariableName($key);
-        unset($_SESSION[$session_var_name]);
+        if (isset($_SESSION[$session_var_name])) {
+            unset($_SESSION[$session_var_name]);
+        }
     }
 
     /**
