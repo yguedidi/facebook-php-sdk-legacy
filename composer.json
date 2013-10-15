@@ -1,14 +1,19 @@
 {
-    "name": "facebook/php-sdk",
+    "name": "yguedidi/facebook-php-sdk",
     "description": "Facebook PHP SDK",
     "keywords": ["facebook", "sdk"],
     "type": "library",
-    "homepage": "https://github.com/facebook/facebook-php-sdk",
-    "license": "Apache2",
+    "homepage": "https://github.com/yguedidi/facebook-php-sdk",
+    "license": "Apache-2.0",
     "authors": [
         {
             "name": "Facebook",
             "homepage": "https://github.com/facebook/facebook-php-sdk/contributors"
+        },
+        {
+            "name": "Yassine Guedidi",
+            "email": "yassine@guedidi.com",
+            "homepage": "https://github.com/yguedidi/facebook-php-sdk/contributors"
         }
     ],
     "require": {
