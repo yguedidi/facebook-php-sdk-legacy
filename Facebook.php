@@ -1,5 +1,6 @@
 <?php
-/**
+
+/*
  * Copyright 2011 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -15,7 +16,7 @@
  * under the License.
  */
 
-require_once "base_facebook.php";
+namespace Facebook;
 
 /**
  * Extends the BaseFacebook class with the intent of using

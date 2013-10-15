@@ -15,6 +15,10 @@
  * under the License.
  */
 
+use Facebook\BaseFacebook;
+use Facebook\Facebook;
+use Facebook\Exception\FacebookApiException;
+
 class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
   const APP_ID = '117743971608120';
   const SECRET = '9c8ea2071859659bea1246d33a9207cf';
@@ -863,7 +867,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
 
       // use the bundled cert from the start
     Facebook::$CURL_OPTS[CURLOPT_CAINFO] =
-      dirname(__FILE__) . '/../src/fb_ca_chain_bundle.crt';
+      dirname(__FILE__) . '/../fb_ca_chain_bundle.crt';
     $response = $facebook->api('/naitik');
 
     unset(Facebook::$CURL_OPTS[CURLOPT_CAINFO]);
@@ -1414,7 +1418,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
   }
 
   /**
-   * @expectedException FacebookAPIException
+   * @expectedException Facebook\Exception\FacebookApiException
    */
   public function testErrorCodeFromRestAPIThrowsException() {
     $methods_to_stub = array(
