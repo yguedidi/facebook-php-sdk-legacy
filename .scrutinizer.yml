@@ -1,0 +1,27 @@
+filter:
+    excluded_paths:
+        - 'vendor/*'
+        - 'examples/*'
+tools:
+    php_cpd:
+        excluded_dirs:
+            - vendor/
+            - examples/
+        filter:
+            excluded_paths: ['vendor/*', 'app/*', 'web/*']
+    php_pdepend:
+        excluded_dirs:
+            1: examples
+    php_cs_fixer:
+        filter:
+            excluded_paths: ['vendor/*', 'app/*', 'web/*']
+        config:
+            level: all
+    php_code_sniffer:
+        filter:
+            excluded_paths: ['vendor/*', 'app/*', 'web/*']
+        config:
+            standard: PSR2
+    php_code_coverage:
+        filter:
+            excluded_paths: ['vendor/*', 'app/*', 'web/*']

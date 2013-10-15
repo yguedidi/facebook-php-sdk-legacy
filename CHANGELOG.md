@@ -9,5 +9,6 @@ __v4.0.0-community__ (2013-XX-XX)
 * Add PHP 5.5 to Travis CI
 * Renamed `bootstrap.php` to `bootstrap.php.dist`
 * Add `phpunit.xml.dist` file
-* PSR-0 refactoring
+* PSR-2 refactoring
 * Make `$READ_ONLY_CALLS` a static class member
+* Add `.scrutinizer.yml` file
