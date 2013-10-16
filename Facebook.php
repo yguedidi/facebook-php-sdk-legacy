@@ -19,6 +19,9 @@
 namespace Facebook;
 
 use Facebook\Exception\FacebookApiException;
+use Facebook\Logger\DefaultLogger;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Provides access to the Facebook Platform.  This class provides
@@ -29,7 +32,7 @@ use Facebook\Exception\FacebookApiException;
  *
  * @author Naitik Shah <naitik@facebook.com>
  */
-class Facebook
+class Facebook implements LoggerAwareInterface
 {
     /**
      * Version.
@@ -195,6 +198,13 @@ class Facebook
     protected $trustForwarded = false;
 
     /**
+     * The logger.
+     *
+     * @var Psr\Log\LoggerInterface
+     */
+    protected $logger;
+
+    /**
      * Initialize a Facebook Application.
      *
      * The configuration:
@@ -202,9 +212,10 @@ class Facebook
      * - secret: the application secret
      * - fileUpload: (optional) boolean indicating if file uploads are enabled
      *
-     * @param array $config The application configuration
+     * @param array                        $config The application configuration
+     * @param Psr\Log\LoggerInterface|null $logger The logger
      */
-    public function __construct($config)
+    public function __construct($config, LoggerInterface $logger = null)
     {
         if (!session_id()) {
             session_start();
@@ -217,6 +228,7 @@ class Facebook
         if (isset($config['trustForwarded']) && $config['trustForwarded']) {
             $this->trustForwarded = true;
         }
+        $this->setLogger($logger);
         $state = $this->getPersistentData('state');
         if (!empty($state)) {
             $this->state = $state;
@@ -326,6 +338,29 @@ class Facebook
     public function useFileUploadSupport()
     {
         return $this->getFileUploadSupport();
+    }
+
+    /**
+     * Set the logger
+     *
+     * @param  Psr\Log\LoggerInterface|null $logger The logger.
+     * @return Facebook
+     */
+    public function setLogger(LoggerInterface $logger = null)
+    {
+        $this->logger = $logger ?: new DefaultLogger();
+
+        return $this;
+    }
+
+    /**
+     * Get the logger.
+     *
+     * @return Psr\Log\LoggerInterface The logger.
+     */
+    public function getLogger()
+    {
+        return $this->logger;
     }
 
     /**
@@ -723,7 +758,7 @@ class Facebook
 
                 return $_REQUEST['code'];
             } else {
-                self::errorLog('CSRF state token does not match one provided.');
+                $this->logger->error('CSRF state token does not match one provided.');
 
                 return false;
             }
@@ -1011,7 +1046,7 @@ class Facebook
         $errno = curl_errno($ch);
         // CURLE_SSL_CACERT || CURLE_SSL_CACERT_BADFILE
         if ($errno == 60 || $errno == 77) {
-            self::errorLog(
+            $this->logger->error(
                 'Invalid or no certificate authority found, ' .
                 'using bundled information'
             );
@@ -1029,7 +1064,7 @@ class Facebook
             $regex = '/Failed to connect to ([^:].*): Network is unreachable/';
             if (preg_match($regex, curl_error($ch), $matches)) {
                 if (strlen(@inet_pton($matches[1])) === 16) {
-                    self::errorLog(
+                    $this->logger->error(
                         'Invalid IPv6 configuration on server, ' .
                         'Please disable or get native IPv6 on your server.'
                     );
@@ -1073,7 +1108,7 @@ class Facebook
         $data = json_decode(self::base64UrlDecode($payload), true);
 
         if (strtoupper($data['algorithm']) !== self::SIGNED_REQUEST_ALGORITHM) {
-            self::errorLog('Unknown algorithm. Expected ' . self::SIGNED_REQUEST_ALGORITHM);
+            $this->logger->error('Unknown algorithm. Expected ' . self::SIGNED_REQUEST_ALGORITHM);
 
             return null;
         }
@@ -1081,7 +1116,7 @@ class Facebook
         // check sig
         $expected_sig = hash_hmac('sha256', $payload, $this->getAppSecret(), $raw = true);
         if ($sig !== $expected_sig) {
-            self::errorLog('Bad Signed JSON signature!');
+            $this->logger->error('Bad Signed JSON signature!');
 
             return null;
         }
@@ -1292,23 +1327,6 @@ class Facebook
     }
 
     /**
-     * Prints to the error log if you aren't in command line mode.
-     *
-     * @param string $msg Log message
-     */
-    protected static function errorLog($msg)
-    {
-        // disable error log if we are running in a CLI environment
-        // @codeCoverageIgnoreStart
-        if (php_sapi_name() != 'cli') {
-            error_log($msg);
-        }
-        // uncomment this if you want to see the errors on the page
-        // print 'error_log: '.$msg."\n";
-        // @codeCoverageIgnoreEnd
-    }
-
-    /**
      * Base64 encoding that doesn't need to be urlencode()ed.
      * Exactly the same as base64_encode except it uses
      *   - instead of +
@@ -1360,7 +1378,7 @@ class Facebook
                 setcookie($cookie_name, '', 1, '/', '.' . $base_domain);
             } else {
                 // @codeCoverageIgnoreStart
-                self::errorLog(
+                $this->logger->error(
                     'There exists a cookie that we wanted to clear that we couldn\'t ' .
                     'clear because headers was already sent. Make sure to do the first ' .
                     'API call before outputing anything.'
@@ -1421,7 +1439,7 @@ class Facebook
     protected function setPersistentData($key, $value)
     {
         if (!in_array($key, self::$kSupportedKeys)) {
-            self::errorLog('Unsupported key passed to setPersistentData.');
+            $this->logger->error('Unsupported key passed to setPersistentData.');
 
             return;
         }
@@ -1441,7 +1459,7 @@ class Facebook
     protected function getPersistentData($key, $default = false)
     {
         if (!in_array($key, self::$kSupportedKeys)) {
-            self::errorLog('Unsupported key passed to getPersistentData.');
+            $this->logger->error('Unsupported key passed to getPersistentData.');
 
             return $default;
         }
@@ -1461,7 +1479,7 @@ class Facebook
     protected function clearPersistentData($key)
     {
         if (!in_array($key, self::$kSupportedKeys)) {
-            self::errorLog('Unsupported key passed to clearPersistentData.');
+            $this->logger->error('Unsupported key passed to clearPersistentData.');
 
             return;
         }

@@ -76,7 +76,7 @@ class SharedFacebook extends Facebook
             setcookie($cookie_name, $cookie_value, $expire, '/', '.' . $base_domain);
         } else {
             // @codeCoverageIgnoreStart
-            self::errorLog(
+            $this->logger->error(
                 'Shared session ID cookie could not be set! You must ensure you ' .
                 'create the Facebook instance before headers have been sent. This ' .
                 'will cause authentication issues after the first request.'
