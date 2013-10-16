@@ -14,3 +14,4 @@ __v4.0.0-community__ (2013-XX-XX)
 * Refactor BaseFacebook to a concrete class Facebook using sessions
 * Refactor Facebook to SharedFacebook, inherit from Facebook
   that manage shared session
+* Add PSR-3 logger
