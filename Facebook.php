@@ -610,7 +610,8 @@ class Facebook
                 array(
                     'client_id'    => $this->getAppId(),
                     'redirect_uri' => $currentUrl, // possibly overwritten
-                    'state'        => $this->state
+                    'state'        => $this->state,
+                    'sdk'          => 'php-sdk-'.self::VERSION,
                 ),
                 $params
             )
@@ -644,26 +645,16 @@ class Facebook
     /**
      * Get a login status URL to fetch the status from Facebook.
      *
-     * The parameters:
-     * - ok_session: the URL to go to if a session is found
-     * - no_session: the URL to go to if the user is not connected
-     * - no_user: the URL to go to if the user is not signed into facebook
-     *
      * @param  array  $params Provide custom parameters
      * @return string The URL for the logout flow
      */
     public function getLoginStatusUrl($params = array())
     {
-        return $this->getUrl(
-            'www',
-            'extern/login_status.php',
+        return $this->getLoginUrl(
             array_merge(
                 array(
-                    'api_key'         => $this->getAppId(),
-                    'no_session'      => $this->getCurrentUrl(),
-                    'no_user'         => $this->getCurrentUrl(),
-                    'ok_session'      => $this->getCurrentUrl(),
-                    'session_version' => 3,
+                    'response_type' => 'code',
+                    'display'       => 'none',
                 ),
                 $params
             )
