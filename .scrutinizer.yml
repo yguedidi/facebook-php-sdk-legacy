@@ -1,0 +1,33 @@
+inherit: true
+
+filter:
+    excluded_paths:
+        - 'vendor/*'
+        - 'examples/*'
+tools:
+    php_cpd:
+        filter:
+            excluded_paths: ['vendor/*', 'examples/*']
+    php_pdepend:
+        excluded_dirs:
+            - vendor
+            - examples
+    php_mess_detector:
+        filter:
+            excluded_paths: ['vendor/*', 'examples/*']
+    php_cs_fixer:
+        filter:
+            excluded_paths: ['vendor/*', 'examples/*']
+        config:
+            level: all
+    php_code_sniffer:
+        filter:
+            excluded_paths: ['vendor/*', 'examples/*']
+        config:
+            standard: PSR2
+    php_code_coverage:
+        test_command: 'vendor/bin/phpunit --stderr'
+        filter:
+            excluded_paths: ['vendor/*', 'examples/*']
+before_commands:
+    - 'composer install --dev'
