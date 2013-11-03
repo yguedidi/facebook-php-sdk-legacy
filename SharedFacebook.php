@@ -16,9 +16,9 @@
  * under the License.
  */
 
-namespace Facebook;
+namespace YassineGuedidi\Facebook;
 
-use Facebook\Storage\StorageInterface;
+use YassineGuedidi\Facebook\Storage\StorageInterface;
 use Psr\Log\LoggerInterface;
 
 /**

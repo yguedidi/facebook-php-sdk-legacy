@@ -16,11 +16,11 @@
  * under the License.
  */
 
-use Facebook\Facebook;
-use Facebook\SharedFacebook;
-use Facebook\Exception\FacebookApiException;
-use Facebook\Storage\PhpSessionStorage;
-use Facebook\Storage\RestrictedStorage;
+use YassineGuedidi\Facebook\Facebook;
+use YassineGuedidi\Facebook\SharedFacebook;
+use YassineGuedidi\Facebook\Exception\FacebookApiException;
+use YassineGuedidi\Facebook\Storage\PhpSessionStorage;
+use YassineGuedidi\Facebook\Storage\RestrictedStorage;
 
 class PHPSDKTestCase extends PHPUnit_Framework_TestCase
 {
@@ -991,7 +991,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
                 'secret' => self::SECRET
         ), new RestrictedStorage(new PhpSessionStorage()));
         $stub = $this->getMock(
-            'Facebook\Facebook', $methods_to_stub, $constructor_args);
+            'YassineGuedidi\Facebook\Facebook', $methods_to_stub, $constructor_args);
         $stub
             ->expects($this->once())
             ->method('getSignedRequest')
@@ -1011,7 +1011,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
                 'secret' => self::SECRET
         ), new RestrictedStorage(new PhpSessionStorage()));
         $stub = $this->getMock(
-            'Facebook\Facebook', $methods_to_stub, $constructor_args);
+            'YassineGuedidi\Facebook\Facebook', $methods_to_stub, $constructor_args);
         $stub
             ->expects($this->once())
             ->method('getSignedRequest')
@@ -1035,7 +1035,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
                 'secret' => self::SECRET
         ), new RestrictedStorage(new PhpSessionStorage()));
         $stub = $this->getMock(
-            'Facebook\Facebook', $methods_to_stub, $constructor_args);
+            'YassineGuedidi\Facebook\Facebook', $methods_to_stub, $constructor_args);
         $stub
             ->expects($this->once())
             ->method('getSignedRequest')
@@ -1063,7 +1063,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
                 'secret' => self::SECRET
         ), new RestrictedStorage(new PhpSessionStorage()));
         $stub = $this->getMock(
-            'Facebook\Facebook', $methods_to_stub, $constructor_args);
+            'YassineGuedidi\Facebook\Facebook', $methods_to_stub, $constructor_args);
         $stub
             ->expects($this->once())
             ->method('getCode')
@@ -1092,7 +1092,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
                 'secret' => self::SECRET
         ), new RestrictedStorage(new PhpSessionStorage()));
         $stub = $this->getMock(
-            'Facebook\Facebook', $methods_to_stub, $constructor_args);
+            'YassineGuedidi\Facebook\Facebook', $methods_to_stub, $constructor_args);
         $stub
             ->expects($this->once())
             ->method('getCode')
@@ -1112,7 +1112,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
                 'secret' => self::SECRET
         ), new RestrictedStorage(new PhpSessionStorage()));
         $stub = $this->getMock(
-            'Facebook\Facebook', $methods_to_stub, $constructor_args);
+            'YassineGuedidi\Facebook\Facebook', $methods_to_stub, $constructor_args);
         $stub
             ->expects($this->once())
             ->method('getSignedRequest')
@@ -1135,7 +1135,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
                 'secret' => self::SECRET
         ), new RestrictedStorage(new PhpSessionStorage()));
         $stub = $this->getMock(
-            'Facebook\Facebook', $methods_to_stub, $constructor_args);
+            'YassineGuedidi\Facebook\Facebook', $methods_to_stub, $constructor_args);
         $stub
             ->expects($this->once())
             ->method('getAccessToken')
@@ -1156,7 +1156,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
             'getUserFromAccessToken',
         );
         $storageStub = $this->getMock(
-            'Facebook\Storage\NullStorage', array('setPersistentData'));
+            'YassineGuedidi\Facebook\Storage\NullStorage', array('setPersistentData'));
         $storageStub
             ->expects($this->once())
             ->method('setPersistentData');
@@ -1166,7 +1166,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
         ), $storageStub);
         $user = 42;
         $stub = $this->getMock(
-            'Facebook\Facebook', $methods_to_stub, $constructor_args);
+            'YassineGuedidi\Facebook\Facebook', $methods_to_stub, $constructor_args);
         $stub
             ->expects($this->once())
             ->method('getAccessToken')
@@ -1190,7 +1190,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
         ), new RestrictedStorage(new PhpSessionStorage()));
         $user = 42;
         $stub = $this->getMock(
-            'Facebook\Facebook', $methods_to_stub, $constructor_args);
+            'YassineGuedidi\Facebook\Facebook', $methods_to_stub, $constructor_args);
         $stub
             ->expects($this->once())
             ->method('getAccessToken')
@@ -1214,7 +1214,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
                 'secret' => self::SECRET
         ), new RestrictedStorage(new PhpSessionStorage()));
         $stub = $this->getMock(
-            'Facebook\Facebook', $methods_to_stub, $constructor_args);
+            'YassineGuedidi\Facebook\Facebook', $methods_to_stub, $constructor_args);
         $stub
             ->expects($this->once())
             ->method('getAccessToken')
@@ -1327,7 +1327,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
     public function testExistingStateRestoredInConstructor()
     {
         $storageStub = $this->getMock(
-            'Facebook\Storage\PhpSessionStorage', array('getPersistentData'));
+            'YassineGuedidi\Facebook\Storage\PhpSessionStorage', array('getPersistentData'));
         $storageStub
             ->expects($this->once())
             ->method('getPersistentData')
@@ -1435,7 +1435,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
         $key = 'foo';
         $val = 42;
         $stub = $this->getMock(
-            'Facebook\Facebook', $methods_to_stub, $constructor_args);
+            'YassineGuedidi\Facebook\Facebook', $methods_to_stub, $constructor_args);
         $stub
             ->expects($this->once())
             ->method('oauthRequest')
@@ -1461,7 +1461,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
         $key = 'foo';
         $val = 42;
         $stub = $this->getMock(
-            'Facebook\Facebook', $methods_to_stub, $constructor_args);
+            'YassineGuedidi\Facebook\Facebook', $methods_to_stub, $constructor_args);
         $stub
             ->expects($this->once())
             ->method('oauthRequest')
@@ -1475,7 +1475,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException Facebook\Exception\FacebookApiException
+     * @expectedException YassineGuedidi\Facebook\Exception\FacebookApiException
      */
     public function testErrorCodeFromRestAPIThrowsException()
     {
@@ -1487,7 +1487,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
                 'secret' => self::SECRET
         ), new RestrictedStorage(new PhpSessionStorage()));
         $stub = $this->getMock(
-            'Facebook\Facebook', $methods_to_stub, $constructor_args);
+            'YassineGuedidi\Facebook\Facebook', $methods_to_stub, $constructor_args);
         $stub
             ->expects($this->once())
             ->method('oauthRequest')

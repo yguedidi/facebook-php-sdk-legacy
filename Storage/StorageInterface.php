@@ -16,7 +16,7 @@
  * under the License.
  */
 
-namespace Facebook\Storage;
+namespace YassineGuedidi\Facebook\Storage;
 
 /**
  * Implement this interface to create a storage for Facebook

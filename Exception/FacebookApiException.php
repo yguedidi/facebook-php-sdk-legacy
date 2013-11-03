@@ -16,7 +16,7 @@
  * under the License.
  */
 
-namespace Facebook\Exception;
+namespace YassineGuedidi\Facebook\Exception;
 
 /**
  * Thrown when an API call returns an exception.

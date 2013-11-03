@@ -26,7 +26,7 @@
         "phpunit/phpunit": "3.7.*"
     },
     "autoload": {
-        "psr-0": { "Facebook\\": "" }
+        "psr-0": { "YassineGuedidi\\Facebook\\": "" }
     },
-    "target-dir": "Facebook"
+    "target-dir": "YassineGuedidi\\Facebook"
 }

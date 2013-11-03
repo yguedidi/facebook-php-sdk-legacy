@@ -16,7 +16,7 @@
  * under the License.
  */
 
-namespace Facebook\Storage;
+namespace YassineGuedidi\Facebook\Storage;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;

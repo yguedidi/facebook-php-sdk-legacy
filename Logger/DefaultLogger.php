@@ -16,7 +16,7 @@
  * under the License.
  */
 
-namespace Facebook\Logger;
+namespace YassineGuedidi\Facebook\Logger;
 
 use Psr\Log\AbstractLogger;
 use Psr\Log\LogLevel;

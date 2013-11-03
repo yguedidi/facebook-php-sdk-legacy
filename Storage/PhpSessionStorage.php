@@ -16,7 +16,7 @@
  * under the License.
  */
 
-namespace Facebook\Storage;
+namespace YassineGuedidi\Facebook\Storage;
 
 /**
  * A Facebook storage implementation uses PHP sessions

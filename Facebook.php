@@ -16,11 +16,11 @@
  * under the License.
  */
 
-namespace Facebook;
+namespace YassineGuedidi\Facebook;
 
-use Facebook\Exception\FacebookApiException;
-use Facebook\Logger\DefaultLogger;
-use Facebook\Storage\StorageInterface;
+use YassineGuedidi\Facebook\Exception\FacebookApiException;
+use YassineGuedidi\Facebook\Logger\DefaultLogger;
+use YassineGuedidi\Facebook\Storage\StorageInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 
