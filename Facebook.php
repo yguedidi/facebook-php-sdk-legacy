@@ -20,6 +20,7 @@ namespace Facebook;
 
 use Facebook\Exception\FacebookApiException;
 use Facebook\Logger\DefaultLogger;
+use Facebook\Storage\StorageInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 
@@ -198,9 +199,16 @@ class Facebook implements LoggerAwareInterface
     protected $trustForwarded = false;
 
     /**
+     * The storage.
+     *
+     * @var StorageInterface
+     */
+    protected $storage;
+
+    /**
      * The logger.
      *
-     * @var Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
     protected $logger;
 
@@ -212,14 +220,12 @@ class Facebook implements LoggerAwareInterface
      * - secret: the application secret
      * - fileUpload: (optional) boolean indicating if file uploads are enabled
      *
-     * @param array                        $config The application configuration
-     * @param Psr\Log\LoggerInterface|null $logger The logger
+     * @param array                $config  The application configuration
+     * @param StorageInterface     $storage The storage
+     * @param LoggerInterface|null $logger  The logger
      */
-    public function __construct($config, LoggerInterface $logger = null)
+    public function __construct($config, StorageInterface $storage, LoggerInterface $logger = null)
     {
-        if (!session_id()) {
-            session_start();
-        }
         $this->setAppId($config['appId']);
         $this->setAppSecret($config['secret']);
         if (isset($config['fileUpload'])) {
@@ -229,7 +235,11 @@ class Facebook implements LoggerAwareInterface
             $this->trustForwarded = true;
         }
         $this->setLogger($logger);
-        $state = $this->getPersistentData('state');
+
+        $storage->setNamespace($this->constructStorageNamespace());
+        $this->setStorage($storage);
+
+        $state = $this->storage->getPersistentData('state');
         if (!empty($state)) {
             $this->state = $state;
         }
@@ -341,6 +351,30 @@ class Facebook implements LoggerAwareInterface
     }
 
     /**
+     * Set the storage
+     *
+     * @param  StorageInterface $storage The storage.
+     *
+     * @return Facebook
+     */
+    public function setStorage(StorageInterface $storage)
+    {
+        $this->storage = $storage;
+
+        return $this;
+    }
+
+    /**
+     * Get the storage.
+     *
+     * @return StorageInterface The storage.
+     */
+    public function getStorage()
+    {
+        return $this->storage;
+    }
+
+    /**
      * Set the logger
      *
      * @param  Psr\Log\LoggerInterface|null $logger The logger.
@@ -416,7 +450,7 @@ class Facebook implements LoggerAwareInterface
 
         $this->destroySession();
 
-        $this->setPersistentData(
+        $this->storage->setPersistentData(
             'access_token',
             $response_params['access_token']
         );
@@ -470,7 +504,7 @@ class Facebook implements LoggerAwareInterface
             // apps.facebook.com hands the access_token in the signed_request
             if (array_key_exists('oauth_token', $signed_request)) {
                 $access_token = $signed_request['oauth_token'];
-                $this->setPersistentData('access_token', $access_token);
+                $this->storage->setPersistentData('access_token', $access_token);
 
                 return $access_token;
             }
@@ -478,15 +512,15 @@ class Facebook implements LoggerAwareInterface
             // the JS SDK puts a code in with the redirect_uri of ''
             if (array_key_exists('code', $signed_request)) {
                 $code = $signed_request['code'];
-                if ($code && $code == $this->getPersistentData('code')) {
+                if ($code && $code == $this->storage->getPersistentData('code')) {
                     // short-circuit if the code we have is the same as the one presented
-                    return $this->getPersistentData('access_token');
+                    return $this->storage->getPersistentData('access_token');
                 }
 
                 $access_token = $this->getAccessTokenFromCode($code, '');
                 if ($access_token) {
-                    $this->setPersistentData('code', $code);
-                    $this->setPersistentData('access_token', $access_token);
+                    $this->storage->setPersistentData('code', $code);
+                    $this->storage->setPersistentData('access_token', $access_token);
 
                     return $access_token;
                 }
@@ -494,24 +528,24 @@ class Facebook implements LoggerAwareInterface
 
             // signed request states there's no access token, so anything
             // stored should be cleared.
-            $this->clearAllPersistentData();
+            $this->clearStorage();
 
             return false; // respect the signed request's data, even
             // if there's an authorization code or something else
         }
 
         $code = $this->getCode();
-        if ($code && $code != $this->getPersistentData('code')) {
+        if ($code && $code != $this->storage->getPersistentData('code')) {
             $access_token = $this->getAccessTokenFromCode($code);
             if ($access_token) {
-                $this->setPersistentData('code', $code);
-                $this->setPersistentData('access_token', $access_token);
+                $this->storage->setPersistentData('code', $code);
+                $this->storage->setPersistentData('access_token', $access_token);
 
                 return $access_token;
             }
 
             // code was bogus, so everything based on it should be invalidated.
-            $this->clearAllPersistentData();
+            $this->clearStorage();
 
             return false;
         }
@@ -520,7 +554,7 @@ class Facebook implements LoggerAwareInterface
         // store, knowing nothing explicit (signed request, authorization
         // code, etc.) was present to shadow it (or we saw a code in $_REQUEST,
         // but it's the same as what's in the persistent store)
-        return $this->getPersistentData('access_token');
+        return $this->storage->getPersistentData('access_token');
     }
 
     /**
@@ -579,24 +613,24 @@ class Facebook implements LoggerAwareInterface
             if (array_key_exists('user_id', $signed_request)) {
                 $user = $signed_request['user_id'];
 
-                if ($user != $this->getPersistentData('user_id')) {
-                    $this->clearAllPersistentData();
+                if ($user != $this->storage->getPersistentData('user_id')) {
+                    $this->clearStorage();
                 }
 
-                $this->setPersistentData('user_id', $signed_request['user_id']);
+                $this->storage->setPersistentData('user_id', $signed_request['user_id']);
 
                 return $user;
             }
 
             // if the signed request didn't present a user id, then invalidate
             // all entries in any persistent store.
-            $this->clearAllPersistentData();
+            $this->clearStorage();
 
             return 0;
         }
 
-        $user = $this->getPersistentData('user_id', $default = 0);
-        $persisted_access_token = $this->getPersistentData('access_token');
+        $user = $this->storage->getPersistentData('user_id', $default = 0);
+        $persisted_access_token = $this->storage->getPersistentData('access_token');
 
         // use access_token to fetch user id if we have a user access_token, or if
         // the cached access token has changed.
@@ -606,9 +640,9 @@ class Facebook implements LoggerAwareInterface
             !($user && $persisted_access_token == $access_token)) {
             $user = $this->getUserFromAccessToken();
             if ($user) {
-                $this->setPersistentData('user_id', $user);
+                $this->storage->setPersistentData('user_id', $user);
             } else {
-                $this->clearAllPersistentData();
+                $this->clearStorage();
             }
         }
 
@@ -754,7 +788,7 @@ class Facebook implements LoggerAwareInterface
 
                 // CSRF state has done its job, so clear it
                 $this->state = null;
-                $this->clearPersistentData('state');
+                $this->storage->clearPersistentData('state');
 
                 return $_REQUEST['code'];
             } else {
@@ -809,7 +843,7 @@ class Facebook implements LoggerAwareInterface
     {
         if ($this->state === null) {
             $this->state = md5(uniqid(mt_rand(), true));
-            $this->setPersistentData('state', $this->state);
+            $this->storage->setPersistentData('state', $this->state);
         }
     }
 
@@ -1366,7 +1400,7 @@ class Facebook implements LoggerAwareInterface
         $this->accessToken = null;
         $this->signedRequest = null;
         $this->user = null;
-        $this->clearAllPersistentData();
+        $this->clearStorage();
 
         // Javascript sets a cookie that will be used in getSignedRequest that we
         // need to clear if we can
@@ -1420,90 +1454,17 @@ class Facebook implements LoggerAwareInterface
     }
 
     /**
-     * Each of the following four methods should be overridden in
-     * a subclass, as they are in this provided class.
-     * This class uses PHP sessions to provide a primitive
-     * persistent store, but another subclass--one that you implement--
-     * might use a database, memcache, or an in-memory cache.
-     */
-
-    /**
-     * Stores the given ($key, $value) pair, so that future calls to
-     * getPersistentData($key) return $value. This call may be in another request.
-     *
-     * @param string $key
-     * @param array  $value
-     *
-     * @return void
-     */
-    protected function setPersistentData($key, $value)
-    {
-        if (!in_array($key, self::$kSupportedKeys)) {
-            $this->logger->error('Unsupported key passed to setPersistentData.');
-
-            return;
-        }
-
-        $session_var_name = $this->constructSessionVariableName($key);
-        $_SESSION[$session_var_name] = $value;
-    }
-
-    /**
-     * Get the data for $key, persisted by Facebook::setPersistentData()
-     *
-     * @param string  $key     The key of the data to retrieve
-     * @param boolean $default The default value to return if $key is not found
-     *
-     * @return mixed
-     */
-    protected function getPersistentData($key, $default = false)
-    {
-        if (!in_array($key, self::$kSupportedKeys)) {
-            $this->logger->error('Unsupported key passed to getPersistentData.');
-
-            return $default;
-        }
-
-        $session_var_name = $this->constructSessionVariableName($key);
-
-        return isset($_SESSION[$session_var_name]) ?
-            $_SESSION[$session_var_name] : $default;
-    }
-
-    /**
-     * Clear the data with $key from the persistent storage
-     *
-     * @param  string $key
-     * @return void
-     */
-    protected function clearPersistentData($key)
-    {
-        if (!in_array($key, self::$kSupportedKeys)) {
-            $this->logger->error('Unsupported key passed to clearPersistentData.');
-
-            return;
-        }
-
-        $session_var_name = $this->constructSessionVariableName($key);
-        if (isset($_SESSION[$session_var_name])) {
-            unset($_SESSION[$session_var_name]);
-        }
-    }
-
-    /**
      * Clear all data from the persistent storage
      *
      * @return void
      */
-    protected function clearAllPersistentData()
+    protected function clearStorage()
     {
-        foreach (self::$kSupportedKeys as $key) {
-            $this->clearPersistentData($key);
-        }
+        $this->storage->clearAllPersistentData();
     }
 
-    protected function constructSessionVariableName($key)
+    protected function constructStorageNamespace()
     {
-        return implode('_', array('fb', $this->getAppId(), $key));
+        return 'fb_' . $this->getAppId();
     }
 }

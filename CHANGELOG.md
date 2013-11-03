@@ -15,3 +15,4 @@ __v4.0.0-community__ (2013-XX-XX)
 * Refactor Facebook to SharedFacebook, inherit from Facebook
   that manage shared session
 * Add PSR-3 logger
+* Persistent data management refactoring

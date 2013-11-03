@@ -18,6 +18,9 @@
 
 namespace Facebook;
 
+use Facebook\Storage\StorageInterface;
+use Psr\Log\LoggerInterface;
+
 /**
  * Extends the Facebook class with the intent of using
  * PHP sessions to store user ids and access tokens.
@@ -36,9 +39,9 @@ class SharedFacebook extends Facebook
     /**
      * {@inheritdoc}
      */
-    public function __construct($config)
+    public function __construct($config, StorageInterface $storage, LoggerInterface $logger = null)
     {
-        parent::__construct($config);
+        parent::__construct($config, $storage, $logger);
 
         $cookie_name = $this->getSharedSessionCookieName();
         if (isset($_COOKIE[$cookie_name])) {
@@ -48,9 +51,12 @@ class SharedFacebook extends Facebook
                 // good case
                 $this->sharedSessionID = $data['id'];
 
+                // set storage namespace again because it depend on sharedSessionID
+                $storage->setNamespace($this->constructStorageNamespace());
+
                 // re-load the persisted state, since parent
                 // attempted to read out of non-shared cookie
-                $state = $this->getPersistentData('state');
+                $state = $this->storage->getPersistentData('state');
                 if (!empty($state)) {
                     $this->state = $state;
                 } else {
@@ -64,12 +70,14 @@ class SharedFacebook extends Facebook
         // evil/corrupt/missing case
         $base_domain = $this->getBaseDomain();
         $this->sharedSessionID = md5(uniqid(mt_rand(), true));
-        $cookie_value = $this->makeSignedRequest(
-            array(
-                'domain' => $base_domain,
-                'id' => $this->sharedSessionID,
-            )
-        );
+
+        // set storage namespace again because it depend on sharedSessionID
+        $storage->setNamespace($this->constructStorageNamespace());
+
+        $cookie_value = $this->makeSignedRequest(array(
+            'domain' => $base_domain,
+            'id' => $this->sharedSessionID,
+        ));
         $_COOKIE[$cookie_name] = $cookie_value;
         if (!headers_sent()) {
             $expire = time() + self::FBSS_COOKIE_EXPIRE;
@@ -101,24 +109,24 @@ class SharedFacebook extends Facebook
     /**
      * {@inheritdoc}
      */
-    protected function clearAllPersistentData()
+    protected function clearStorage()
     {
-        parent::clearAllPersistentData();
+        parent::clearStorage();
 
         if ($this->sharedSessionID) {
             $this->deleteSharedSessionCookie();
         }
     }
 
-    protected function constructSessionVariableName($key)
+    protected function constructStorageNamespace()
     {
-        $name = parent::constructSessionVariableName($key);
+        $namespace = parent::constructStorageNamespace();
 
         if ($this->sharedSessionID) {
-            return $this->sharedSessionID . '_' . $name;
+            return $this->sharedSessionID . '_' . $namespace;
         }
 
-        return $name;
+        return $namespace;
     }
 
     protected static function isAllowedDomain($big, $small)
